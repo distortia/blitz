@@ -3,7 +3,6 @@ defmodule Blitz.Case do
 
   using do
     quote do
-
       import Blitz.Factory
       import Mox
     end
