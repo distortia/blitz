@@ -118,8 +118,7 @@ defmodule Blitz.HttpImpl do
   defp handle_error({:ok, %Response{status: 403}}), do: {:error, "invalid api key"}
   defp handle_error({:ok, %Response{status: 404}}), do: {:error, "not found"}
   # TODO: Strip out api key from logs
-  defp handle_error(error) do
-    IO.inspect(error)
+  defp handle_error(_error) do
     # Logger.error(error)
     {:error, "unknown error occured"}
   end

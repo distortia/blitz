@@ -1,4 +1,5 @@
 defmodule Blitz.Factory do
+  @moduledoc false
   use ExMachina
 
   # Helper functions

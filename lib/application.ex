@@ -1,4 +1,5 @@
 defmodule Blitz.Application do
+  @moduledoc false
   use Application
 
   @impl true
