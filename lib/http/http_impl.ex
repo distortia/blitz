@@ -55,6 +55,10 @@ defmodule Blitz.HttpImpl do
     end
   end
 
+  @doc """
+  Looks up the given summoners match history for the most recent `match_count` matches
+  Returns {:ok, [match_ids]} or {:error, reason} with most recent match first
+  """
   @impl Http
   def fetch_recent_match_ids_for_summoner(summoner_id, region, match_count) do
     with :ok <- valid_region?(region),
@@ -71,6 +75,10 @@ defmodule Blitz.HttpImpl do
     end
   end
 
+  @doc """
+  Looks up the given match and returns it
+  Returns {:ok, match} or {:error, reason}
+  """
   @impl Http
   def fetch_match(match_id, region) do
     with :ok <- valid_region?(region),
@@ -78,8 +86,7 @@ defmodule Blitz.HttpImpl do
          req <- base_req(),
          {:ok, %Response{status: 200, body: body}} <-
            Req.get(req,
-             url:
-               "https://#{match_region}.api.riotgames.com/lol/match/v5/matches/#{match_id}"
+             url: "https://#{match_region}.api.riotgames.com/lol/match/v5/matches/#{match_id}"
            ) do
       {:ok, body}
     else
@@ -118,6 +125,7 @@ defmodule Blitz.HttpImpl do
   defp handle_error({:ok, %Response{status: 403}}), do: {:error, "invalid api key"}
   defp handle_error({:ok, %Response{status: 404}}), do: {:error, "not found"}
   # TODO: Strip out api key from logs
+  # TODO: add rate limiting error case
   defp handle_error(_error) do
     # Logger.error(error)
     {:error, "unknown error occured"}
