@@ -31,6 +31,7 @@ defmodule Blitz.MixProject do
       {:req, "~> 0.3.0"},
       {:ex_machina, "~> 2.7.0"},
       {:faker, "~> 0.17", only: :test},
+      {:mox, "~> 1.0", only: :test}
 
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
