@@ -81,48 +81,102 @@ defmodule Blitz.HttpTest do
       {:ok, summoner_id: summoner_id, region: region}
     end
 
-    test "returns a list of matches for the given player", %{
+    test "returns a list of match ids for the given player", %{
       summoner_id: summoner_id,
       region: region
     } do
       matches = 1..5 |> Enum.map(fn _ -> match_id() end)
 
       HttpMock
-      |> expect(:fetch_matches_for_summoner, fn ^summoner_id, ^region, 5 -> {:ok, matches} end)
+      |> expect(:fetch_recent_match_ids_for_summoner, fn ^summoner_id, ^region, 5 ->
+        {:ok, matches}
+      end)
 
-      assert {:ok, matches} == Http.fetch_matches_for_summoner(summoner_id, region)
+      assert {:ok, matches} == Http.fetch_recent_match_ids_for_summoner(summoner_id, region)
     end
 
     test "returns an error when summoner is invalid", %{region: region} do
       invalid_summoner_id = "invalid_user"
 
       HttpMock
-      |> expect(:fetch_matches_for_summoner, fn ^invalid_summoner_id, ^region, 5 ->
+      |> expect(:fetch_recent_match_ids_for_summoner, fn ^invalid_summoner_id, ^region, 5 ->
         {:error, "not found"}
       end)
 
-      assert {:error, "not found"} == Http.fetch_matches_for_summoner(invalid_summoner_id, region)
+      assert {:error, "not found"} ==
+               Http.fetch_recent_match_ids_for_summoner(invalid_summoner_id, region)
     end
 
     test "returns an error if the given region is invalid", %{summoner_id: summoner_id} do
       region = "invalid_region"
 
       HttpMock
-      |> expect(:fetch_matches_for_summoner, fn ^summoner_id, ^region, 5 ->
+      |> expect(:fetch_recent_match_ids_for_summoner, fn ^summoner_id, ^region, 5 ->
         {:error, "invalid region"}
       end)
 
-      assert {:error, "invalid region"} == Http.fetch_matches_for_summoner(summoner_id, region)
+      assert {:error, "invalid region"} ==
+               Http.fetch_recent_match_ids_for_summoner(summoner_id, region)
     end
 
-    test "returns an error when api key is invalid" do
-      username = Faker.Internet.user_name()
+    test "returns an error when api key is invalid", %{summoner_id: summoner_id, region: region} do
+      HttpMock
+      |> expect(:fetch_recent_match_ids_for_summoner, fn ^summoner_id, ^region, 5 ->
+        {:error, "invalid api key"}
+      end)
+
+      assert {:error, "invalid api key"} ==
+               Http.fetch_recent_match_ids_for_summoner(summoner_id, region)
+    end
+  end
+
+  describe "fetch_match" do
+    setup do
+      match_id = match_id()
       region = region_id()
+      match = build(:match)
+
+      {:ok, match_id: match_id, match: match, region: region}
+    end
+
+    test "returns the match from the given match_id", %{
+      match_id: match_id,
+      match: match,
+      region: region
+    } do
+      HttpMock
+      |> expect(:fetch_match, fn ^match_id, ^region -> {:ok, match} end)
+
+      assert {:ok, match} == Http.fetch_match(match_id, region)
+    end
+
+    test "returns an error when match id is invalid", %{region: region} do
+      invalid_match_id = "invalid_match_id"
 
       HttpMock
-      |> expect(:fetch_summoner, fn ^username, ^region -> {:error, "invalid api key"} end)
+      |> expect(:fetch_match, fn ^invalid_match_id, ^region ->
+        {:error, "not found"}
+      end)
 
-      assert {:error, "invalid api key"} == Http.fetch_summoner(username, region)
+      assert {:error, "not found"} == Http.fetch_match(invalid_match_id, region)
+    end
+
+    test "returns an error if the given region is invalid", %{match_id: match_id} do
+      invalid_region = "invalid_region"
+
+      HttpMock
+      |> expect(:fetch_match, fn ^match_id, ^invalid_region ->
+        {:error, "invalid region"}
+      end)
+
+      assert {:error, "invalid region"} == Http.fetch_match(match_id, invalid_region)
+    end
+
+    test "returns an error when api key is invalid", %{match_id: match_id, region: region} do
+      HttpMock
+      |> expect(:fetch_match, fn ^match_id, ^region -> {:error, "invalid api key"} end)
+
+      assert {:error, "invalid api key"} == Http.fetch_match(match_id, region)
     end
   end
 end

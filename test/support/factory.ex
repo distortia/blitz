@@ -26,6 +26,15 @@ defmodule Blitz.Factory do
     |> Enum.random()
   end
 
+  def match_region_id do
+    ["americas", "europe", "asia", "sea"]
+    |> Enum.random()
+  end
+
+  def player_list do
+    1..10 |> Enum.map(fn _ -> Faker.UUID.v4() end)
+  end
+
   def summoner_factory do
     %{
       id: Faker.UUID.v4(),
@@ -35,6 +44,14 @@ defmodule Blitz.Factory do
       profileIconId: 3542,
       revisionDate: 1_623_472_262_000,
       summonerLevel: Faker.random_between(1, 100)
+    }
+  end
+
+  def match_factory do
+    %{
+      metadata: %{
+        participants: player_list()
+      }
     }
   end
 end

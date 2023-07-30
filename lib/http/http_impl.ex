@@ -50,16 +50,13 @@ defmodule Blitz.HttpImpl do
            ) do
       {:ok, body}
     else
-      false ->
-        {:error, "invalid region"}
-
       error ->
         handle_error(error)
     end
   end
 
   @impl Http
-  def fetch_matches_for_summoner(summoner_id, region, match_count) do
+  def fetch_recent_match_ids_for_summoner(summoner_id, region, match_count) do
     with :ok <- valid_region?(region),
          {:ok, match_region} <- match_region(region),
          req <- base_req(),
@@ -67,6 +64,22 @@ defmodule Blitz.HttpImpl do
            Req.get(req,
              url:
                "https://#{match_region}.api.riotgames.com/lol/match/v5/matches/by-puuid/#{summoner_id}/ids?start=0&count=#{match_count}"
+           ) do
+      {:ok, body}
+    else
+      error -> handle_error(error)
+    end
+  end
+
+  @impl Http
+  def fetch_match(match_id, region) do
+    with :ok <- valid_region?(region),
+         {:ok, match_region} <- match_region(region),
+         req <- base_req(),
+         {:ok, %Response{status: 200, body: body}} <-
+           Req.get(req,
+             url:
+               "https://#{match_region}.api.riotgames.com/lol/match/v5/matches/#{match_id}"
            ) do
       {:ok, body}
     else
@@ -102,14 +115,12 @@ defmodule Blitz.HttpImpl do
     end
   end
 
-  # https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/NvMXz1xGunq_bKGcg7SS3dPAKGwZGi1iUYQO62ydHRqTbEYoR0h0UaZBp38Sf3-9xLaNgCMBwOodmg/ids?start=0&count=5
-  # https://americas.api.riotgames.com/lol/match/v5/matches/NA1_3940954172
-
-  defp handle_error({:error, %Response{status: 403}}), do: {:error, "invalid api key"}
-  defp handle_error({:error, %Response{status: 404}}), do: {:error, "not found"}
+  defp handle_error({:ok, %Response{status: 403}}), do: {:error, "invalid api key"}
+  defp handle_error({:ok, %Response{status: 404}}), do: {:error, "not found"}
   # TODO: Strip out api key from logs
   defp handle_error(error) do
-    Logger.error(error)
+    IO.inspect(error)
+    # Logger.error(error)
     {:error, "unknown error occured"}
   end
 
