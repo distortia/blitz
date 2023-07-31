@@ -4,6 +4,7 @@ defmodule Blitz.Factory do
 
   # Helper functions
   def match_id, do: region_id() <> "_" <> Faker.UUID.v4()
+  def username, do: Faker.Internet.user_name()
 
   def region_id do
     [
@@ -41,7 +42,7 @@ defmodule Blitz.Factory do
       id: Faker.UUID.v4(),
       accountId: Faker.UUID.v4(),
       puuid: Faker.UUID.v4(),
-      name: Faker.Internet.user_name(),
+      name: username(),
       profileIconId: 3542,
       revisionDate: 1_623_472_262_000,
       summonerLevel: Faker.random_between(1, 100)
@@ -51,6 +52,10 @@ defmodule Blitz.Factory do
   def match_factory do
     %{
       metadata: %{
+        match_id: match_id(),
+        participants: player_list()
+      },
+      info: %{
         participants: player_list()
       }
     }

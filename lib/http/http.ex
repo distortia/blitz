@@ -19,7 +19,7 @@ defmodule Blitz.Http do
               region :: region(),
               match_count :: non_neg_integer()
             ) :: {:ok, list(String.t())} | error()
-  def fetch_recent_match_ids_for_summoner(summoner_id, region, match_count \\ 5),
+  def fetch_recent_match_ids_for_summoner(summoner_id, region, match_count),
     do: impl().fetch_recent_match_ids_for_summoner(summoner_id, region, match_count)
 
   @callback fetch_match(match_id :: match_id(), region :: region()) :: {:ok, match()} | error()

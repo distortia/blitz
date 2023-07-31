@@ -3,8 +3,6 @@ defmodule Blitz.HttpImpl do
   The Riot HTTP client responsible for any requests made to the Riot API
   Riot Docs: https://developer.riotgames.com/apis#summoner-v4/
   """
-  require Logger
-
   alias Blitz.Http
   alias Req
   alias Req.Response
@@ -125,9 +123,9 @@ defmodule Blitz.HttpImpl do
   defp handle_error({:ok, %Response{status: 403}}), do: {:error, "invalid api key"}
   defp handle_error({:ok, %Response{status: 404}}), do: {:error, "not found"}
   # TODO: Strip out api key from logs
-  # TODO: add rate limiting error case
-  defp handle_error(_error) do
-    # Logger.error(error)
+  # TODO: add rate limiting error case?
+  defp handle_error(error) do
+    IO.inspect(error)
     {:error, "unknown error occured"}
   end
 
