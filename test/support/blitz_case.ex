@@ -6,6 +6,7 @@ defmodule Blitz.Case do
     quote do
       import Blitz.Factory
       import Mox
+      import ShorterMaps
     end
   end
 end
