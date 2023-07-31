@@ -26,10 +26,11 @@ defmodule BlitzTest do
     assert {:ok, summoner} == Blitz.get_summoner_by_name(name, region)
   end
 
-  test "get_recent_matches_for_summoner", ~M{summoner_id, region, matches} do
-    assert {:ok, matches} == Blitz.get_recent_matches_for_summoner(summoner_id, region)
+  test "recent_matches_for_summoner", ~M{summoner_id, region, matches} do
+    assert {:ok, matches} == Blitz.recent_matches_for_summoner(summoner_id, region)
   end
 
   test "fetching a match returns the participants" do
+    
   end
 end
