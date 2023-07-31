@@ -11,7 +11,7 @@ defmodule Blitz do
           list(summoner_name()) | {:error, String.t()}
   def main(summoner_name, region) do
     with {:ok, summoner} <- get_summoner_by_name(summoner_name, region),
-         {:ok, match_ids} <- get_recent_matches_for_summoner(summoner.id, region),
+         {:ok, match_ids} <- get_recent_matches_for_summoner(summoner.puuid, region),
          {:ok, recent_players} <- recent_players_from_match_ids(match_ids, region) do
       # TODO: return the player names
       recent_players
@@ -45,9 +45,9 @@ defmodule Blitz do
   def recent_players_from_match_id(match_id, region) do
     with {:ok, match} <- Http.fetch_match(match_id, region) do
       match
-      |> Map.get("info")
-      |> Map.get("participants")
-      |> Enum.map(&Map.get(&1, "summonerName"))
+      |> Map.get(:info)
+      |> Map.get(:participants)
+      |> Enum.map(&Map.get(&1, :summonerName))
     end
   end
 end
