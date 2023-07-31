@@ -38,7 +38,6 @@ defmodule Blitz do
     {:ok, recent_players}
   end
 
-  # TODO: add json decoding from payloads
   def recent_players_from_match_id(match_id, region) do
     with {:ok, match} <- Http.fetch_match(match_id, region) do
       match

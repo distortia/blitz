@@ -5,6 +5,7 @@ defmodule Blitz.Factory do
   # Helper functions
   def match_id, do: region_id() <> "_" <> Faker.UUID.v4()
   def username, do: Faker.Internet.user_name()
+  def puuid, do: Faker.UUID.v4()
 
   def region_id do
     [
@@ -34,14 +35,21 @@ defmodule Blitz.Factory do
   end
 
   def player_list do
-    1..10 |> Enum.map(fn _ -> Faker.UUID.v4() end)
+    1..10 |> Enum.map(fn _ -> username() end)
+  end
+
+  def player_factory do
+    %{
+      summonerName: username(),
+      puuid: puuid()
+    }
   end
 
   def summoner_factory do
     %{
       id: Faker.UUID.v4(),
       accountId: Faker.UUID.v4(),
-      puuid: Faker.UUID.v4(),
+      puuid: puuid(),
       name: username(),
       profileIconId: 3542,
       revisionDate: 1_623_472_262_000,
@@ -53,10 +61,10 @@ defmodule Blitz.Factory do
     %{
       metadata: %{
         match_id: match_id(),
-        participants: player_list()
+        participants: build_list(10, :player)
       },
       info: %{
-        participants: player_list()
+        participants: build_list(10, :player)
       }
     }
   end

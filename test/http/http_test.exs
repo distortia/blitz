@@ -69,7 +69,7 @@ defmodule Blitz.HttpTest do
 
   describe "fetch_matches" do
     setup do
-      %{puuid: summoner_id} = summoner = build(:summoner)
+      %{puuid: summoner_id} = build(:summoner)
       match_count = 5
       region = region_id()
 

@@ -8,7 +8,6 @@ defmodule BlitzTest do
     name = username()
     %{puuid: summoner_id} = summoner = build(:summoner, name: name)
     region = region_id()
-    player_list = player_list()
     matches = build_list(5, :match)
     %{metadata: %{match_id: match_id}} = match = hd(matches)
 
@@ -19,7 +18,7 @@ defmodule BlitzTest do
     end)
     |> stub(:fetch_match, fn ^match_id, ^region -> {:ok, match} end)
 
-    ~M{name, summoner, summoner_id, region, player_list, matches}
+    ~M{name, summoner, summoner_id, region, matches, match, match_id}
   end
 
   test "fetching summoner by name and region", ~M{summoner, name, region} do
@@ -30,7 +29,22 @@ defmodule BlitzTest do
     assert {:ok, matches} == Blitz.recent_matches_for_summoner(summoner_id, region)
   end
 
-  test "fetching a match returns the participants" do
-    
+  # TODO: fix
+  # test "fetching a list of matches returns all the participants", ~M{matches, region} do
+  #   player_list = Enum.flat_map(matches, &get_players_from_match/1)
+  #   match_ids = Enum.map(matches, &Map.get(&1, :match_id))
+  #   Enum.each(match_ids, fn match_id ->
+
+  #   end)
+  #   assert player_list == Blitz.recent_players_from_match_ids(match_ids, region)
+  # end
+
+  test "fetching a match returns the participants", ~M{match_id, match, region} do
+    player_list = get_players_from_match(match)
+    assert player_list == Blitz.recent_players_from_match_id(match_id, region)
+  end
+
+  defp get_players_from_match(match) do
+    match.info.participants |> Enum.map(&Map.get(&1, :summonerName))
   end
 end

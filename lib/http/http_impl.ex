@@ -44,7 +44,7 @@ defmodule Blitz.HttpImpl do
          req <- base_req(),
          {:ok, %Response{status: 200, body: body}} <-
            Req.get(req,
-           decode_json: [keys: :atoms],
+             decode_json: [keys: :atoms],
              url: "https://#{region}.api.riotgames.com/lol/summoner/v4/summoners/by-name/#{name}"
            ) do
       {:ok, body}
@@ -65,7 +65,7 @@ defmodule Blitz.HttpImpl do
          req <- base_req(),
          {:ok, %Response{status: 200, body: body}} <-
            Req.get(req,
-           decode_json: [keys: :atoms],
+             decode_json: [keys: :atoms],
              url:
                "https://#{match_region}.api.riotgames.com/lol/match/v5/matches/by-puuid/#{summoner_id}/ids?start=0&count=#{match_count}"
            ) do
@@ -86,7 +86,7 @@ defmodule Blitz.HttpImpl do
          req <- base_req(),
          {:ok, %Response{status: 200, body: body}} <-
            Req.get(req,
-           decode_json: [keys: :atoms],
+             decode_json: [keys: :atoms],
              url: "https://#{match_region}.api.riotgames.com/lol/match/v5/matches/#{match_id}"
            ) do
       {:ok, body}
