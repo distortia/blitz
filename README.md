@@ -1,21 +1,19 @@
 # Blitz
 
-**TODO: Add description**
-
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `blitz` to your list of dependencies in `mix.exs`:
+Set the API key as an environment variable before running: `RIOT_API_KEY=<xyz> iex -S mix` or `export RIOT_API_KEY=<xyz>` and run `iex -S mix` afterwards
 
-```elixir
-def deps do
-  [
-    {:blitz, "~> 0.1.0"}
-  ]
-end
+Or you can set it directly in the dev config with the following:
+
+`config :blitz, riot_api_key: "RGAPI-<my key>"`
+
+
 ```
+mix deps.get
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/blitz>.
+iex -S mix
+
+Blitz.main("summoner name", "region")
+```
 

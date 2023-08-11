@@ -18,7 +18,7 @@ defmodule Blitz.Http do
               summoner_id :: summoner_id(),
               region :: region(),
               match_count :: non_neg_integer()
-            ) :: {:ok, list(String.t())} | error()
+            ) :: {:ok, list(match_id())} | error()
   def fetch_recent_match_ids_for_summoner(summoner_id, region, match_count),
     do: impl().fetch_recent_match_ids_for_summoner(summoner_id, region, match_count)
 

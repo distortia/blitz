@@ -59,6 +59,13 @@ defmodule Blitz.HttpTest do
       assert {:error, "invalid api key"} == Http.fetch_summoner(username, region)
     end
 
+    test "returns an error when getting rate limited", ~M{username, region} do
+      HttpMock
+      |> expect(:fetch_summoner, fn ^username, ^region -> {:error, "rate limit exceeded"} end)
+
+      assert {:error, "rate limit exceeded"} == Http.fetch_summoner(username, region)
+    end
+
     test "returns an error when anything else goes wrong", ~M{username, region} do
       HttpMock
       |> expect(:fetch_summoner, fn ^username, ^region -> {:error, "unknown error occurred"} end)
@@ -124,6 +131,16 @@ defmodule Blitz.HttpTest do
       assert {:error, "invalid api key"} ==
                Http.fetch_recent_match_ids_for_summoner(summoner_id, region, match_count)
     end
+
+    test "returns an error when rate limited", ~M{summoner_id, region, match_count} do
+      HttpMock
+      |> expect(:fetch_recent_match_ids_for_summoner, fn ^summoner_id, ^region, ^match_count ->
+        {:error, "rate limit exceeded"}
+      end)
+
+      assert {:error, "rate limit exceeded"} ==
+               Http.fetch_recent_match_ids_for_summoner(summoner_id, region, match_count)
+    end
   end
 
   describe "fetch_match" do
@@ -168,6 +185,13 @@ defmodule Blitz.HttpTest do
       |> expect(:fetch_match, fn ^match_id, ^region -> {:error, "invalid api key"} end)
 
       assert {:error, "invalid api key"} == Http.fetch_match(match_id, region)
+    end
+
+    test "returns an error when rate limited", ~M{match_id, region} do
+      HttpMock
+      |> expect(:fetch_match, fn ^match_id, ^region -> {:error, "rate limit exceeded"} end)
+
+      assert {:error, "rate limit exceeded"} == Http.fetch_match(match_id, region)
     end
   end
 end
