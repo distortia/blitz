@@ -1,5 +1,6 @@
 defmodule Blitz.Factory do
   @moduledoc false
+  alias Blitz.Monitor
   use ExMachina
 
   # Helper functions
@@ -54,6 +55,16 @@ defmodule Blitz.Factory do
       profileIconId: 3542,
       revisionDate: 1_623_472_262_000,
       summonerLevel: Faker.random_between(1, 100)
+    }
+  end
+
+  def monitor_data(summoner, timestamp \\ DateTime.utc_now()) do
+    %Monitor{
+      name: summoner.name,
+      puuid: summoner.puuid,
+      match_id: match_id(),
+      region: region_id(),
+      timestamp: timestamp
     }
   end
 

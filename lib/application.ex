@@ -4,7 +4,9 @@ defmodule Blitz.Application do
 
   @impl true
   def start(_type, _args) do
-    children = []
+    children = [
+      {Blitz.Monitor, name: Blitz.Monitor}
+    ]
 
     opts = [strategy: :one_for_one, name: Blitz.Supervisor]
     Supervisor.start_link(children, opts)

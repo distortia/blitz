@@ -4,15 +4,15 @@ defmodule Blitz do
   """
 
   alias Blitz.Http
+  alias Blitz.Monitor
 
-  @type summoner_name :: String.t()
-
-  @spec main(summoner_name :: summoner_name(), region :: Http.region()) ::
-          list(summoner_name()) | {:error, String.t()}
+  @spec main(summoner_name :: Http.summoner_name(), region :: Http.region()) ::
+          list(Http.summoner_name()) | {:error, String.t()}
   def main(summoner_name, region) do
     with {:ok, summoner} <- get_summoner_by_name(summoner_name, region),
          {:ok, match_ids} <- recent_matches_for_summoner(summoner.puuid, region),
-         {:ok, recent_players} <- recent_players_from_match_ids(match_ids, region) do
+         {:ok, recent_players} <- recent_players_from_match_ids(match_ids, region),
+         :ok <- Monitor.add_summoners(recent_players, region) do
       recent_players
     else
       error ->
@@ -29,7 +29,6 @@ defmodule Blitz do
   end
 
   def recent_players_from_match_ids(match_ids, region) do
-    # TODO: handle error from api calls
     recent_players =
       match_ids
       |> Enum.flat_map(&recent_players_from_match_id(&1, region))
