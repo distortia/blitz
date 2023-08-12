@@ -10,10 +10,11 @@ defmodule Blitz.Monitor do
   require Logger
   alias Blitz.Http
 
-  @type summoner_name :: String.t()
-
   defstruct [:name, :puuid, :match_id, :region, :timestamp]
 
+  @doc """
+    Adds a list of summoners to be monitored
+  """
   @spec add_summoners(summoners :: list(Http.summoner_name()), region :: Http.region()) ::
           :ok | {:error, any()}
   def add_summoners(summoners, region) do
@@ -21,7 +22,11 @@ defmodule Blitz.Monitor do
     |> Enum.each(&add_summoner(&1, region))
   end
 
-  @spec add_summoner(Http.summoner_name(), Http.region()) :: :ok | {:error, any()}
+  @doc """
+    Adds a summoner to be monitored
+  """
+  @spec add_summoner(summoner_name :: Http.summoner_name(), region :: Http.region()) ::
+          :ok | {:error, any()}
   def add_summoner(summoner_name, region) do
     with {:ok, summoner} <- Http.fetch_summoner(summoner_name, region),
          {:ok, match_id} <- recent_match_for_summoner(summoner, region) do
@@ -31,7 +36,9 @@ defmodule Blitz.Monitor do
       schedule_monitor(summoner_data)
       :ok
     else
-      error -> error
+      error ->
+        Logger.error("#{inspect(error)}")
+        error
     end
   end
 
@@ -46,7 +53,7 @@ defmodule Blitz.Monitor do
     end
   end
 
-  def to_struct(summoner, match_id, region) do
+  defp to_struct(summoner, match_id, region) do
     %__MODULE__{
       name: summoner.name,
       puuid: summoner.puuid,
@@ -60,46 +67,44 @@ defmodule Blitz.Monitor do
     GenServer.start_link(__MODULE__, [], opts)
   end
 
+  @impl true
   def init(opts) do
     schedule_prune()
 
     {:ok, opts}
   end
 
+  @impl true
   def handle_call(:list, _from, state) do
     {:reply, state, state}
   end
 
+  @impl true
   def handle_cast({:add, summoner}, state) do
     new_state = add_or_refresh_summoner_timestamp(summoner, state)
 
     {:noreply, new_state}
   end
 
+  @impl true
   def handle_info({:monitor, summoner}, state) do
     summoner
     |> find_summoner_by_name(state)
     |> if do
-      Task.async(fn ->
-        case recent_match_for_summoner(summoner, summoner.region) do
-          {:ok, match_id} ->
-            send(__MODULE__, {:task, {:ok, summoner, match_id}})
-
-          {:error, reason} ->
-            send(__MODULE__, {:task, {:error, reason}})
-        end
-      end)
+      async_monitor(summoner)
     end
 
     {:noreply, state}
   end
 
+  @impl true
   def handle_info(:prune, state) do
     new_state = prune_stale_summoners(state)
 
     {:noreply, new_state}
   end
 
+  @impl true
   def handle_info({:task, {:ok, summoner, match_id}}, state) do
     new_state =
       summoner
@@ -109,17 +114,34 @@ defmodule Blitz.Monitor do
     {:noreply, new_state}
   end
 
-  def handle_info({:task, {:error, reason}}, state) do
-    Logger.error("Failed to complete task: #{reason}")
+  @impl true
+  def handle_info({:task, {:error, error}}, state) do
+    Logger.error("Failed to complete task: #{inspect(error)}")
     {:noreply, state}
   end
 
+  @impl true
   def handle_info({_ref, _task}, state), do: {:noreply, state}
+  @impl true
   def handle_info({:DOWN, _ref, _process, _pid, _status}, state), do: {:noreply, state}
 
+  @impl true
   def handle_info(message, state) do
     Logger.info(fn -> "unknown message recieved #{inspect(message)}" end)
     {:noreply, state}
+  end
+
+  defp async_monitor(summoner) do
+    Task.async(fn ->
+      case recent_match_for_summoner(summoner, summoner.region) do
+        {:ok, match_id} ->
+          send(__MODULE__, {:task, {:ok, summoner, match_id}})
+
+        {:error, error} ->
+          schedule_monitor(summoner)
+          send(__MODULE__, {:task, {:error, error}})
+      end
+    end)
   end
 
   defp schedule_monitor(summoner) do
@@ -187,6 +209,7 @@ defmodule Blitz.Monitor do
 
   defp prune_stale_summoners(state) do
     Logger.info("pruning stale summoners")
+
     hour_ago =
       DateTime.utc_now()
       |> DateTime.add(-1, :hour)

@@ -131,7 +131,7 @@ defmodule Blitz.HttpImpl do
   defp handle_error({:ok, %Response{status: 429}}), do: {:error, "rate limit exceeded"}
 
   defp handle_error(error) do
-    Logger.error(fn -> "#{inspect(error)}" end)
+    Logger.error("#{inspect(error)}")
     {:error, "unknown error occured"}
   end
 
