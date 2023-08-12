@@ -77,15 +77,19 @@ defmodule Blitz.Monitor do
   end
 
   def handle_info({:monitor, summoner}, state) do
-    Task.async(fn ->
-      case recent_match_for_summoner(summoner, summoner.region) do
-        {:ok, match_id} ->
-          send(__MODULE__, {:task, {:ok, summoner, match_id}})
+    summoner
+    |> find_summoner_by_name(state)
+    |> if do
+      Task.async(fn ->
+        case recent_match_for_summoner(summoner, summoner.region) do
+          {:ok, match_id} ->
+            send(__MODULE__, {:task, {:ok, summoner, match_id}})
 
-        {:error, reason} ->
-          send(__MODULE__, {:task, {:error, reason}})
-      end
-    end)
+          {:error, reason} ->
+            send(__MODULE__, {:task, {:error, reason}})
+        end
+      end)
+    end
 
     {:noreply, state}
   end
@@ -182,6 +186,7 @@ defmodule Blitz.Monitor do
   end
 
   defp prune_stale_summoners(state) do
+    Logger.info("pruning stale summoners")
     hour_ago =
       DateTime.utc_now()
       |> DateTime.add(-1, :hour)
@@ -191,6 +196,8 @@ defmodule Blitz.Monitor do
       |> Enum.reject(fn %{timestamp: timestamp} ->
         timestamp < hour_ago
       end)
+
+    Logger.info("New summoner_count: #{length(new_state)}")
 
     schedule_prune()
 
